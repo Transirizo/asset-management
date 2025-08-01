@@ -12,9 +12,22 @@ import { createAsset } from "@/store/assetSlice";
 import { AppDispatch } from "@/store/store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, CheckCircle, QrCode, Download } from "lucide-react";
 import { toast } from "sonner";
@@ -49,14 +62,14 @@ function NewAssetPageContent() {
     resolver: zodResolver(assetSchema),
     defaultValues: {
       name: "",
-      purchaseDate: new Date().toISOString().split('T')[0],
+      purchaseDate: new Date().toISOString().split("T")[0],
       location: "茶山",
       price: 0,
       invoiceType: "普票",
       taxRate: 0.06,
       modelSpec: "",
       category: "电子设备",
-      lastCheckDate: new Date().toISOString().split('T')[0],
+      lastCheckDate: new Date().toISOString().split("T")[0],
       imageUrl: "",
       status: "在用",
       storagePlace: "",
@@ -65,7 +78,7 @@ function NewAssetPageContent() {
   });
 
   useEffect(() => {
-    const code = searchParams.get('code');
+    const code = searchParams.get("code");
     if (code) {
       setPresetCode(code);
     }
@@ -81,24 +94,24 @@ function NewAssetPageContent() {
           id: presetCode,
           ...data,
         };
-        const response = await fetch('/api/assets', {
-          method: 'POST',
+        const response = await fetch("/api/assets", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(assetData),
         });
-        
+
         if (!response.ok) {
-          throw new Error('Failed to create asset');
+          throw new Error("Failed to create asset");
         }
-        
+
         result = await response.json();
       } else {
         // Use Redux action for auto-generated ID
         result = await dispatch(createAsset(data)).unwrap();
       }
-      
+
       setCreatedAsset(result);
       toast.success("资产创建成功！");
     } catch (error) {
@@ -110,12 +123,12 @@ function NewAssetPageContent() {
   };
 
   const downloadQRCode = () => {
-    const svg = document.querySelector('#qr-code svg') as SVGElement;
+    const svg = document.querySelector("#qr-code svg") as SVGElement;
     if (svg) {
       const svgData = new XMLSerializer().serializeToString(svg);
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
       const url = URL.createObjectURL(svgBlob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.download = `asset-${createdAsset.id}-qr.svg`;
       link.href = url;
       link.click();
@@ -138,12 +151,8 @@ function NewAssetPageContent() {
           {/* Asset Info */}
           <Card className="border-green-200">
             <CardHeader className="bg-green-50">
-              <CardTitle className="text-center text-green-800">
-                {createdAsset.name}
-              </CardTitle>
-              <p className="text-center text-green-600 font-mono">
-                {createdAsset.id}
-              </p>
+              <CardTitle className="text-center text-green-800">{createdAsset.name}</CardTitle>
+              <p className="text-center text-green-600 font-mono">{createdAsset.id}</p>
             </CardHeader>
           </Card>
 
@@ -162,9 +171,7 @@ function NewAssetPageContent() {
                   includeMargin={true}
                 />
               </div>
-              <p className="text-sm text-gray-600">
-                请打印或截图保存此二维码，并粘贴到对应资产上
-              </p>
+              <p className="text-sm text-gray-600">请打印或截图保存此二维码，并粘贴到对应资产上</p>
               <Button onClick={downloadQRCode} variant="outline" className="w-full">
                 <Download className="mr-2 h-4 w-4" />
                 下载二维码
@@ -213,17 +220,13 @@ function NewAssetPageContent() {
 
         {/* Preset Code Display */}
         {presetCode && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <QrCode className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900">扫描到的编码</p>
-                  <p className="text-lg font-mono text-blue-600">{presetCode}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center space-x-2 bg-blue-50 border-blue-200 border-2 rounded-md p-2">
+            <QrCode className="h-5 w-5 text-blue-600" />
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-blue-900">扫描到的编码:</p>
+              <p className="text-lg font-mono text-blue-600">{presetCode}</p>
+            </div>
+          </div>
         )}
 
         <Form {...form}>
@@ -483,11 +486,7 @@ function NewAssetPageContent() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>资产照片 URL (可选)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} />
-                      </FormControl>
-                      <FormMessage />
+                      <Input id="picture" type="file" {...field} />
                     </FormItem>
                   )}
                 />
@@ -496,12 +495,7 @@ function NewAssetPageContent() {
 
             {/* Actions */}
             <div className="pb-4">
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                disabled={isSubmitting}
-              >
+              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -524,15 +518,17 @@ function NewAssetPageContent() {
 
 export default function NewAssetPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 p-4">
-        <div className="max-w-md mx-auto">
-          <div className="text-center py-8">
-            <p className="text-gray-500">加载中...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 p-4">
+          <div className="max-w-md mx-auto">
+            <div className="text-center py-8">
+              <p className="text-gray-500">加载中...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <NewAssetPageContent />
     </Suspense>
   );

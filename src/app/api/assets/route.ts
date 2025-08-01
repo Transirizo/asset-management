@@ -20,10 +20,10 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const requestData = await request.json();
-    
+
     let id: string;
     let newAssetData: Omit<Asset, "id">;
-    
+
     if (requestData.id) {
       // Use provided ID (from scanned QR code)
       id = requestData.id;
@@ -36,17 +36,17 @@ export async function POST(request: NextRequest) {
       id = `ZC-${year}-${randomSuffix}`;
       newAssetData = requestData;
     }
-    
+
     const asset: Asset = {
       id,
       ...newAssetData,
     };
-    
+
     const stmt = db.prepare(`
       INSERT INTO assets (id, name, purchaseDate, location, price, invoiceType, taxRate, modelSpec, category, lastCheckDate, imageUrl, status, storagePlace, owner)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    
+
     stmt.run(
       asset.id,
       asset.name,
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       asset.storagePlace,
       asset.owner
     );
-    
+
     return NextResponse.json(asset, { status: 201 });
   } catch (error) {
     console.error("Failed to create asset:", error);
