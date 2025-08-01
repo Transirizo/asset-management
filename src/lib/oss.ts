@@ -43,8 +43,8 @@ export const uploadImageToOSS = async (file: File): Promise<string> => {
     const buffer = Buffer.from(await file.arrayBuffer());
     const result = await client.put(fileName, buffer, {
       headers: {
-        "Content-Type": "image/jpg",
-        "Content-Disposition": `inline; filename="${file.name}"`,
+        "Content-Type": file.type || "image/jpg",
+        "Content-Disposition": "inline",
       },
     });
     console.log("result", result);

@@ -30,10 +30,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > 10 * 1024 * 1024) {
       console.log('错误: 文件太大');
       return NextResponse.json(
-        { error: '文件大小不能超过5MB' },
+        { error: '文件大小不能超过10MB' },
         { status: 400 }
       );
     }

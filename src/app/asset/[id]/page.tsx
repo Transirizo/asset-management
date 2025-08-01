@@ -136,7 +136,7 @@ export default function AssetDetailPage() {
           </Link>
         </div>
 
-        {/* Asset Image
+        {/* Asset Image */}
         {asset.imageUrl && (
           <Card>
             <CardContent className="p-4">
@@ -145,7 +145,7 @@ export default function AssetDetailPage() {
               </div>
             </CardContent>
           </Card>
-        )} */}
+        )}
 
         {/* Basic Info */}
         <Card>

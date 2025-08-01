@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import imageCompression from "browser-image-compression";
 
 interface ImageUploadProps {
   value?: string;
@@ -20,48 +21,60 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast.error('只支持图片文件');
+    if (!file.type.startsWith("image/")) {
+      toast.error("只支持图片文件");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('文件大小不能超过5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("文件大小不能超过10MB");
       return;
     }
 
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      // 压缩图片
+      const options = {
+        maxSizeMB: 1, // 压缩到最大1MB
+        maxWidthOrHeight: 1920, // 最大宽高1920px
+        useWebWorker: true,
+        initialQuality: 0.8, // 初始质量80%
+      };
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
+      console.log("原始文件大小:", (file.size / 1024 / 1024).toFixed(2) + "MB");
+      const compressedFile = await imageCompression(file, options);
+      console.log("压缩后文件大小:", (compressedFile.size / 1024 / 1024).toFixed(2) + "MB");
+
+      const formData = new FormData();
+      formData.append("file", compressedFile);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       });
 
       const result = await response.json();
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || '上传失败');
+        throw new Error(result.error || "上传失败");
       }
 
       onChange(result.url);
-      toast.success('图片上传成功');
+      toast.success("图片上传成功");
     } catch (error) {
-      console.error('上传失败:', error);
-      toast.error('图片上传失败，请重试');
+      console.error("上传失败:", error);
+      toast.error("图片上传失败，请重试");
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
 
   const handleRemove = () => {
-    onChange('');
+    onChange("");
   };
 
   const handleClick = () => {
@@ -79,7 +92,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
         disabled={disabled || uploading}
       />
 
-      {value && value.startsWith('http') ? (
+      {value && value.startsWith("http") ? (
         <div className="relative group">
           <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
             <Image
@@ -115,7 +128,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
             <div className="flex flex-col items-center space-y-2">
               <ImageIcon className="h-8 w-8 text-gray-400" />
               <p className="text-sm text-gray-500">点击上传图片</p>
-              <p className="text-xs text-gray-400">支持 JPG、PNG 格式，最大 5MB</p>
+              <p className="text-xs text-gray-400">支持 JPG、PNG 格式，最大 10MB，自动压缩</p>
             </div>
           )}
         </div>
@@ -130,7 +143,7 @@ export function ImageUpload({ value, onChange, disabled }: ImageUploadProps) {
         className="w-full"
       >
         <Upload className="mr-2 h-4 w-4" />
-        {value && value.startsWith('http') ? '更换图片' : '上传图片'}
+        {value && value.startsWith("http") ? "更换图片" : "上传图片"}
       </Button>
     </div>
   );
