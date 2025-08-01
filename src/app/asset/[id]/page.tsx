@@ -136,13 +136,32 @@ export default function AssetDetailPage() {
           </Link>
         </div>
 
-        {/* Asset Image */}
-        {asset.imageUrl && (
+        {/* Asset Images */}
+        {asset.imageUrls && asset.imageUrls.length > 0 && (
           <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">资产图片</CardTitle>
+            </CardHeader>
             <CardContent className="p-4">
-              <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                <Image src={asset.imageUrl} alt={asset.name} fill className="object-cover" />
-              </div>
+              {asset.imageUrls.length === 1 ? (
+                <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                  <Image src={asset.imageUrls[0]} alt={asset.name} fill className="object-cover" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {asset.imageUrls.map((url, index) => (
+                    <div key={index} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      <Image 
+                        src={url} 
+                        alt={`${asset.name} 图片 ${index + 1}`} 
+                        fill 
+                        className="object-cover"
+                        sizes="(max-width: 768px) 50vw, 25vw" 
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

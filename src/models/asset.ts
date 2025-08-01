@@ -11,7 +11,7 @@ export interface Asset {
   modelSpec: string; // 规格型号 (长文本)
   category: "电子设备" | "办公家具" | "其他"; // 类别
   lastCheckDate: string; // 盘点日期 (YYYY-MM-DD)
-  imageUrl?: string; // 资产照片 URL (可选)
+  imageUrls?: string[]; // 资产照片 URLs (可选，多张图片)
   status: "在用" | "闲置" | "维修中" | "报废"; // 使用状态
   storagePlace: string; // 存放地点
   owner: string; // 责任人

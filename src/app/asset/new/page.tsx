@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageUpload } from "@/components/ui/image-upload";
+import { MultipleImageUpload } from "@/components/ui/multiple-image-upload";
 import { ArrowLeft, Save, CheckCircle, QrCode, Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -43,7 +43,7 @@ const assetSchema = z.object({
   modelSpec: z.string().min(1, "规格型号不能为空"),
   category: z.enum(["电子设备", "办公家具", "其他"]),
   lastCheckDate: z.string().min(1, "盘点日期不能为空"),
-  imageUrl: z.string().optional(),
+  imageUrls: z.array(z.string()).optional(),
   status: z.enum(["在用", "闲置", "维修中", "报废"]),
   storagePlace: z.string().min(1, "存放地点不能为空"),
   owner: z.string().min(1, "责任人不能为空"),
@@ -71,7 +71,7 @@ function NewAssetPageContent() {
       modelSpec: "",
       category: "电子设备",
       lastCheckDate: new Date().toISOString().split("T")[0],
-      imageUrl: "",
+      imageUrls: [],
       status: "在用",
       storagePlace: "",
       owner: "",
@@ -484,14 +484,15 @@ function NewAssetPageContent() {
 
                 <FormField
                   control={form.control}
-                  name="imageUrl"
+                  name="imageUrls"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>资产图片</FormLabel>
                       <FormControl>
-                        <ImageUpload
+                        <MultipleImageUpload
                           value={field.value}
                           onChange={field.onChange}
+                          maxImages={5}
                         />
                       </FormControl>
                       <FormMessage />

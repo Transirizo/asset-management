@@ -18,9 +18,38 @@ db.exec(`
     modelSpec TEXT,
     category TEXT,
     lastCheckDate TEXT,
-    imageUrl TEXT,
+    imageUrls TEXT,
     status TEXT,
     storagePlace TEXT,
     owner TEXT
   )
 `);
+
+// 迁移现有数据：如果存在 imageUrl 列，则迁移到 imageUrls
+try {
+  // 检查是否存在 imageUrl 列
+  const columns = db.prepare("PRAGMA table_info(assets)").all() as any[];
+  const hasImageUrl = columns.some(col => col.name === 'imageUrl');
+  const hasImageUrls = columns.some(col => col.name === 'imageUrls');
+  
+  if (hasImageUrl && !hasImageUrls) {
+    // 添加新列
+    db.exec('ALTER TABLE assets ADD COLUMN imageUrls TEXT');
+    
+    // 迁移数据：将单个 imageUrl 转换为数组格式
+    const assets = db.prepare('SELECT id, imageUrl FROM assets WHERE imageUrl IS NOT NULL AND imageUrl != ""').all();
+    const updateStmt = db.prepare('UPDATE assets SET imageUrls = ? WHERE id = ?');
+    
+    for (const asset of assets) {
+      const imageUrls = JSON.stringify([asset.imageUrl]);
+      updateStmt.run(imageUrls, asset.id);
+    }
+    
+    console.log(`Migrated ${assets.length} assets from imageUrl to imageUrls`);
+  } else if (!hasImageUrls) {
+    // 如果没有任何图片列，添加 imageUrls 列
+    db.exec('ALTER TABLE assets ADD COLUMN imageUrls TEXT');
+  }
+} catch (error) {
+  console.error('Migration error:', error);
+}

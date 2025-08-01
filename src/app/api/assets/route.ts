@@ -8,8 +8,15 @@ import { Asset } from "@/models/asset";
 export async function GET() {
   try {
     const stmt = db.prepare("SELECT * FROM assets");
-    const assets = stmt.all() as Asset[];
-    return NextResponse.json(assets);
+    const assets = stmt.all() as any[];
+    
+    // Parse imageUrls from JSON string
+    const assetsWithParsedImages = assets.map(asset => ({
+      ...asset,
+      imageUrls: asset.imageUrls ? JSON.parse(asset.imageUrls) : []
+    })) as Asset[];
+    
+    return NextResponse.json(assetsWithParsedImages);
   } catch (error) {
     console.error("Failed to fetch assets:", error);
     return NextResponse.json({ error: "Failed to fetch assets" }, { status: 500 });
@@ -43,7 +50,7 @@ export async function POST(request: NextRequest) {
     };
 
     const stmt = db.prepare(`
-      INSERT INTO assets (id, name, purchaseDate, location, price, invoiceType, taxRate, modelSpec, category, lastCheckDate, imageUrl, status, storagePlace, owner)
+      INSERT INTO assets (id, name, purchaseDate, location, price, invoiceType, taxRate, modelSpec, category, lastCheckDate, imageUrls, status, storagePlace, owner)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
@@ -58,7 +65,7 @@ export async function POST(request: NextRequest) {
       asset.modelSpec,
       asset.category,
       asset.lastCheckDate,
-      asset.imageUrl,
+      JSON.stringify(asset.imageUrls || []),
       asset.status,
       asset.storagePlace,
       asset.owner

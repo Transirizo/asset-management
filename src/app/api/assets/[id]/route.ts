@@ -9,13 +9,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const stmt = db.prepare("SELECT * FROM assets WHERE id = ?");
-    const asset = stmt.get(id) as Asset | undefined;
+    const asset = stmt.get(id) as any | undefined;
 
     if (!asset) {
       return NextResponse.json({ error: "Asset not found" }, { status: 404 });
     }
 
-    return NextResponse.json(asset);
+    // Parse imageUrls from JSON string
+    const assetWithParsedImages = {
+      ...asset,
+      imageUrls: asset.imageUrls ? JSON.parse(asset.imageUrls) : []
+    } as Asset;
+
+    return NextResponse.json(assetWithParsedImages);
   } catch (error) {
     console.error("Failed to fetch asset:", error);
     return NextResponse.json({ error: "Failed to fetch asset" }, { status: 500 });
@@ -31,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const stmt = db.prepare(`
       UPDATE assets SET 
         name = ?, purchaseDate = ?, location = ?, price = ?, invoiceType = ?, 
-        taxRate = ?, modelSpec = ?, category = ?, lastCheckDate = ?, imageUrl = ?, 
+        taxRate = ?, modelSpec = ?, category = ?, lastCheckDate = ?, imageUrls = ?, 
         status = ?, storagePlace = ?, owner = ?
       WHERE id = ?
     `);
@@ -46,7 +52,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       updatedAsset.modelSpec,
       updatedAsset.category,
       updatedAsset.lastCheckDate,
-      updatedAsset.imageUrl,
+      JSON.stringify(updatedAsset.imageUrls || []),
       updatedAsset.status,
       updatedAsset.storagePlace,
       updatedAsset.owner,
