@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { ArrowLeft, Save, CheckCircle, QrCode, Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -486,7 +487,14 @@ function NewAssetPageContent() {
                   name="imageUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <Input id="picture" type="file" {...field} />
+                      <FormLabel>资产图片</FormLabel>
+                      <FormControl>
+                        <ImageUpload
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
