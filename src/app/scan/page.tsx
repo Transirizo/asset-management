@@ -17,36 +17,37 @@ export default function ScanPage() {
   const handleScanResult = async (result: any) => {
     const scannedText = result?.[0]?.rawValue || result?.data || result;
     console.log("QR code detected:", scannedText);
-    
+    const regex = /([^/]+)$/;
+    const codeText = scannedText.match(regex)[1];
+    console.log(codeText, "codeText");
+
     // Temporarily stop scanning to prevent multiple scans
     setIsScanning(false);
 
     try {
       // First check if asset exists in database
-      const response = await fetch(`/api/assets/${encodeURIComponent(scannedText)}`);
-      
+      const response = await fetch(`/api/assets/${encodeURIComponent(codeText)}`);
+
       if (response.ok) {
         // Asset exists, navigate to asset detail page
-        toast.success(`识别到资产: ${scannedText}`);
-        router.push(`/asset/${scannedText}`);
+        toast.success(`识别到资产: ${codeText}`);
+        router.push(`/asset/${codeText}`);
       } else if (response.status === 404) {
         // Asset doesn't exist, navigate to new asset page with pre-filled code
         toast.info("资产不存在，跳转到新增页面");
-        router.push(`/asset/new?code=${encodeURIComponent(scannedText)}`);
+        router.push(`/asset/new?code=${encodeURIComponent(codeText)}`);
       } else {
         throw new Error("查询资产失败");
       }
     } catch (error) {
       console.error("Failed to check asset:", error);
       toast.error("查询资产时出现错误");
-      
+
       // Show dialog asking if user wants to create new asset
       setTimeout(() => {
-        const shouldCreate = confirm(
-          "无法查询资产信息。是否要创建新资产？"
-        );
+        const shouldCreate = confirm("无法查询资产信息。是否要创建新资产？");
         if (shouldCreate) {
-          router.push(`/asset/new?code=${encodeURIComponent(scannedText)}`);
+          router.push(`/asset/new?code=${encodeURIComponent(codeText)}`);
         } else {
           // Restart scanning
           setTimeout(() => {
@@ -86,9 +87,7 @@ export default function ScanPage() {
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <CameraOff className="mx-auto h-16 w-16 text-red-400" />
-              <CardDescription>
-                {error}
-              </CardDescription>
+              <CardDescription>{error}</CardDescription>
               <Button onClick={() => window.location.reload()} className="w-full">
                 刷新页面
               </Button>
@@ -121,17 +120,17 @@ export default function ScanPage() {
               onScan={handleScanResult}
               onError={handleError}
               constraints={{
-                facingMode: 'environment',
+                facingMode: "environment",
               }}
               styles={{
                 container: {
-                  width: '100%',
-                  height: '320px',
+                  width: "100%",
+                  height: "320px",
                 },
                 video: {
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
                 },
               }}
             />
@@ -143,7 +142,7 @@ export default function ScanPage() {
               </div>
             </div>
           )}
-          
+
           {/* Scanning overlay */}
           {isScanning && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
